@@ -25,87 +25,49 @@ typedef pair<ll,ll> pll;
 
 const int INF = 0x3f3f3f3f;
 
-int turn;
-
-int dx[8] = {0,0,1,-1,1,1,-1,-1};
-int dy[8] = {1,-1,0,0,-1,1,-1,1};
-
-bool valid(int i, int j, int n, int m) {
-	return i>=0 && i<n && j>=0 && j<m;
-}
-
-void go(int n, int m) {
-
-	vector<pair<int,int>> as;
-
-	vector<vector<int>> dist(n,vector<int>(m, INF));
-	
-	vector<vector<int>> grid(n,vector<int>(m));
-
-
-	fr(i,n){
-		fr(j,m) {
-			char c; cin >> c; 
-			grid[i][j] = c-'A';
-			if(c=='A') {
-				as.push_back(make_pair(i,j));
-				dist[i][j]=1;
-			}
-		}
-	}
-
-	set<tuple<int,int,int>> s;
-	for(auto x : as) {
-		s.insert(make_tuple(1,x.first,x.second));
-	}
-
-	while(!s.empty()) {
-		tuple<int,int,int> t = *s.begin();
-		s.erase(s.begin());
-
-		int d,vi,vj;
-		tie(d,vi,vj) = t;
-
-		fr(k,8) {
-
-			int new_i = vi + dx[k];
-			int new_j = vj + dy[k];
-			
-			if(valid(new_i,new_j,n,m) && grid[new_i][new_j] == 1 + grid[vi][vj]) {
-
-				if(dist[new_i][new_j]!=INF)	continue;
-
-				dist[new_i][new_j] = 1 + dist[vi][vj];
-				s.insert(make_tuple(dist[new_i][new_j],new_i,new_j));
-			
-			}
-		}
-
-	}
-
-	int best = 0;
-	fr(i,n) {
-		fr(j,m) {
-			if(dist[i][j]==INF)	continue;
-			best=max(best,dist[i][j]);
-		}
-	}
-
-	cout << "Case " << turn << ": " << best << endl;
-	turn++;
-
-}
-
 int main(){
 
 	fastio;
 
-	int n,m;
-	turn = 1;
-	while(cin >> n >> m){
-		if(!n)	break;
-		go(n,m);
+	string s; cin >> s;
+	int n = s.size();
+
+	vector<vector<int>> adj(26);
+	vector<int> dist(n+1, 1e9);
+
+	dist[0]=0;
+	queue<int> q;
+	q.push(0);
+
+	fr(i,n) {
+		adj[ s[i]-'0' ].push_back(i);
 	}
-	
+
+	while(!q.empty()) {
+		int v = q.front();
+		q.pop();
+
+		if(v-1>=0 && dist[v-1]==1e9) {
+			dist[v-1]=1+dist[v];
+			q.push(v-1);
+		}
+
+		if(v+1<n && dist[v+1]==1e9) {
+			dist[v+1]=1+dist[v];
+			q.push(v+1);
+		}
+
+		for(auto x : adj[ s[v]-'0' ]) {
+			if (dist[x]==1e9){
+				dist[x]=1+dist[v];
+				q.push(x);
+			}
+		}
+		adj[s[v]-'0'].clear();
+
+	} 
+
+	cout << dist[n-1]<<endl;
+
 
 }
